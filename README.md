@@ -1,2 +1,2 @@
 # ia-uncuyo-2024
-## Tomás Rando
+Repositorio de trabajos prácticos de la materia "**Inteligencia Artificial I**" del año **2024**.
