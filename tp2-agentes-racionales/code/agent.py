@@ -1,14 +1,16 @@
+from abc import ABC, abstractmethod
 from environment import * 
 import random
 
-class Agent:
+class Agent(ABC):
     def __init__(self, env):
-        posX = random.randint(0, env.sizeX - 1)
-        posY = random.randint(0, env.sizeY - 1)
+        self.posX = random.randint(0, env.sizeX - 1)
+        self.posY = random.randint(0, env.sizeY - 1)
         #Casillas limpiadas
-        cleaned = 0
+        self.cleaned = 0
+        self.env = env
         #Tiempo de vida restante
-        lives = 1000
+        self.lives = 1000
     
     #Se mueve hacia arriba
     def up(self):
@@ -36,20 +38,13 @@ class Agent:
     
     #Limpia la casilla actual
     def suck(self):
-        if self.env.acceptAction("Limpiar", self.posX, self.posY) == True:
-            cleaned = cleaned + 1
-        return
+        return self.env.acceptAction("Limpiar", self.posX, self.posY)
     
     #No realiza ninguna acción
     def idle(self):
         return
     
-    #Sensa el entorno
-    def perspective(self):
-        #Pendiente de implementación
-        return
-    
     #Implementa las acciones que realizará el agente
+    @abstractmethod
     def think(self):
-        #Pendiente de implementación
         return

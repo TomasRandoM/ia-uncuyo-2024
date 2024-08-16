@@ -63,9 +63,11 @@ class Environment:
             else:
                 return True
         elif action == "Limpiar":
-            if self.isDirty(self, x, y) == True:
+            if self.isDirty(x, y) == True:
                 self.grid[x][y] = 0
-            return True
+                return True
+            else:
+                return False
         else:
             return False
             
