@@ -1,0 +1,14 @@
+1. Consider a modified version of the vacuum environment in Exercise 2.8, in which the
+agent is penalized one point for each movement.
+    - a) El agente reflexivo simple no puede ser perfectamente racional para el entorno dado con las condiciones brindadas, esto es debido a que, al ser penalizado cada vez que realiza un movimiento y al no tener capacidad de detectar la suciedad restante, debe seguir moviendose infinitamente, agotando toda la vida que posee.
+    - b) Personalmente, considero que un agente reflexivo con un estado sí podría ser perfectamente racional en este entorno específico. Esto es debido a que el entorno es de 1 x 2, por ello, el agente, al tener un estado podría pisar cada cuadrado solo una vez y no realizar ningún movimiento adicional. El agente en cuestión podría mantener un estado que almacene la dirección en la que se movió anteriormente y se podría impedir que se moviese para la dirección opuesta en el movimiento actual. Entonces, por ejemplo, si el agente empieza en la casilla izquierda, se mueve a la derecha, el estado guarda la dirección derecha, por lo que en el siguiente movimiento no se puede mover a la izquierda, pero como no tiene otra dirección posible se detiene.
+    
+    - c) En el caso de que se percibiera el estado limpio/sucio de cada casilla en el entorno, creo que sí se podrían realizar agentes perfectamente racionales en ambos casos, puesto que ahora sí habría una manera de establecer la mejor ruta a cada ubicación para así minimizar las penalizaciones.
+
+2. Consider a modified version of the vacuum environment in Exercise 2.8, in which the
+geography of the environment—its extent, boundaries, and obstacles—is unknown, as is the
+initial dirt configuration. (The agent can go Up and Down as well as Left and Right.)
+    - a) No, un agente reflexivo simple no podría ser perfectamente racional en el caso de que se contabilizaran las penalizaciones, esto es debido a que en este caso tampoco se podría encontrar el mejor camino que minimice los movimientos al no saber de antemano la ubicación de las casillas sucias.
+    - b) No, un agente con las acciones realizadas aleatoriamente no sería mejor que un agente reflexivo simple. Esto se puede comprobar viendo los resultados de los agentes realizados en los anteriores puntos del trabajo práctico.
+    - c) Un agente aleatorio tendrá un resultado particularmente malo cuando el área sea muy extensa. Un ejemplo de esto podría ser el entorno desarrollado anteriormente, cuyo tamaño era 128 x 128, pues al ser tan grande es muy poco probable que pase por un casillero sucio
+    - d) Sí, considero que un agente reflexivo con estados es mejor que un agente reflexivo simple, pues podrá "recordar" las casillas por las que ha pasado y no repetirlas. Sin embargo, al no ser capaz de ver todo el entorno, también deberá pasar por todo el área
