@@ -8,6 +8,8 @@ class Environment:
         self.sizeY = sizeY
         #Porcentaje de casillas sucias
         self.dirtRate = dirtRate
+        #Cantidad total de casillas sucias
+        self.dirt = round(self.sizeX * self.sizeY * self.dirtRate)
         self.grid = [[0 for i in range(sizeY)] for j in range(sizeX)]
         #Lista con todas las posiciones del entorno
         self.positions = []
@@ -18,9 +20,7 @@ class Environment:
     
     #Crea los lugares sucios aleatoriamente en el grid
     def initDirt(self):
-        totalSize = self.sizeX * self.sizeY
-        totalDirt = int(self.dirtRate * totalSize)
-        dirtyPositions = random.sample(self.positions, totalDirt)
+        dirtyPositions = random.sample(self.positions, self.dirt)
         for i in dirtyPositions:
             self.grid[i[0]][i[1]] = 1
         return
@@ -65,6 +65,7 @@ class Environment:
         elif action == "Limpiar":
             if self.isDirty(x, y) == True:
                 self.grid[x][y] = 0
+                self.dirt -= 1 
                 return True
             else:
                 return False
