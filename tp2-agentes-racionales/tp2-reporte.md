@@ -3,7 +3,7 @@
 ## Introducción.  
 
 En los ejercicios **4** y **5** se evaluó un agente reflexivo simple y un agente aleatorio considerando la medida de desempeño y las unidades de tiempo consumidas para entornos de diversos tamaños y diferentes porcentajes de suciedad. Los tamaños de entorno considerados fueron de:
-- 2x2, 4x4, 8x8, 16x16, 32x32, 64x64, 128x128
+- 2x2, 4x4, 8x8, 16x16, 32x32, 64x64, 128x128       
 Mientras que los porcentajes de suciedad considerados fueron de:
 - 0.1, 0.2, 0.4, 0.8
 
