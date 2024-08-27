@@ -62,3 +62,19 @@ def getResults(results, dirtRate):
             promCleaned.append(results[i][2])
             promMoved.append(results[i][3])
     return promCleaned, promMoved
+
+#Hace el gráfico de cajas y extensiones, dataList1 y dataList2 son los datos (dataList2 puede ser None), title es el título del gráfico,
+#ylabel es la etiqueta del eje y, xlabel es la etiqueta del eje x
+def whiskers(dataList1, dataList2, title, ylabel, xlabel):
+    plot.figure(figsize=(10, 6))
+    plot.boxplot(dataList1, vert=False, patch_artist=True)
+    if dataList2 != None:
+        plot.boxplot(dataList2, vert=False, patch_artist=True)
+    plot.title(title)
+    plot.ylabel(ylabel)
+    plot.xlabel(xlabel)
+    plot.grid(True)
+    plot.savefig("whiskers.png")
+    return 0
+
+    

@@ -33,6 +33,8 @@ if __name__ == "__main__":
     n = len(environments)
     it = 0
     results = []
+    results32Reflexive = []
+    results32Random = []
     resultsRandom = []
     for i in range(2, n + 2):
         #Se realiza una copia del environment para que el mismo entorno sea utilizado por ambos agentes.
@@ -49,9 +51,13 @@ if __name__ == "__main__":
         #Se suman las celdas limpiadas y movimientos realizados
         results[len(results) - 1][2] += cleaned
         results[len(results) - 1][3] += moved
+        if (environment1.dirtRate == 0.8) and (environment1.sizeX == 32):
+            results32Reflexive.append(cleaned)
         sheet.cell(row = 3, column = i, value = cleaned)
         sheet.cell(row = 4, column = i, value = moved)
         cleaned, moved = agent2.think()
+        if (environment1.dirtRate == 0.8) and (environment1.sizeX == 32):
+            results32Random.append(cleaned)
         #Se suman las celdas limpiadas y movimientos realizados
         resultsRandom[len(results) - 1][2] += cleaned
         resultsRandom[len(results) - 1][3] += moved
@@ -70,6 +76,8 @@ if __name__ == "__main__":
     plotData(results, resultsRandom, 0.2)
     plotData(results, resultsRandom, 0.4)
     plotData(results, resultsRandom, 0.8)
+    whiskers(results32Reflexive, results32Random, "Cajas y extensiones para entorno 32x32 y porcentaje de suciedad de 0.8", None, "Celdas limpiadas")
+
 
     #Se guarda el archivo excel.
     excelBook.save("./results.xlsx")
