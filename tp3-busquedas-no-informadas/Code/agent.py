@@ -1,4 +1,3 @@
-import node
 from queue import PriorityQueue
 
 class Agent:
@@ -44,9 +43,9 @@ class Agent:
                         frontier.append(childNode)
                         frontierAux.add(childNode)
         if solution == None:
-            return [], []
+            return [], [], []
         else:
-            return self.createPath(parentDict, solution)
+            return self.createPath(parentDict, solution, explored)
 
 
     def recorrerProfundidad(self, scenary):
@@ -88,9 +87,9 @@ class Agent:
                         frontier.append(childNode)
                         frontierAux.add(childNode)
         if solution == None:
-            return [], []
+            return [], [], []
         else:
-            return self.createPath(parentDict, solution)
+            return self.createPath(parentDict, solution, explored)
 
     def recorrerProfundidadLimitada(self, scenary, maxDepth):
         desc = scenary.desc
@@ -141,9 +140,9 @@ class Agent:
                         frontier.append(childNode)
                         frontierAux.add(childNode)
         if solution == None:
-            return [], []
+            return [], [], []
         else:
-            return self.createPath(parentDict, solution)
+            return self.createPath(parentDict, solution, explored)
         
     def recorrerCostoUniforme(self, scenary, costOption):
         desc = scenary.desc
@@ -200,9 +199,9 @@ class Agent:
                         frontier, parentDict = self.replacePriorityItem(frontier, childNode, childPriority, parentDict, actNode)
                         priorityDict[childNode] = childPriority
         if solution == None:
-            return [], []
+            return [], [], []
         else:
-            return self.createPath(parentDict, solution)
+            return self.createPath(parentDict, solution, explored)
 
     def aEstrella(self, scenary, costOption):
         desc = scenary.desc
@@ -261,9 +260,9 @@ class Agent:
                         frontier, parentDict = self.replacePriorityItem(frontier, childNode, childPriority, parentDict, actNode)
                         priorityDict[childNode] = childPriority
         if solution == None:
-            return [], []
+            return [], [], []
         else:
-            return self.createPath(parentDict, solution)
+            return self.createPath(parentDict, solution, explored)
 
     def heuristic(self, node, goal):
         return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
@@ -298,7 +297,7 @@ class Agent:
         return state
 
 
-    def createPath(self, parentDict, solution):
+    def createPath(self, parentDict, solution, explored):
         path = []
         directions = []
         actNode = solution
@@ -311,7 +310,7 @@ class Agent:
                 path.insert(0, (actNode[0], actNode[1]))
                 directions.insert(0, self.getDirections(parentNode[0], parentNode[1], actNode[0], actNode[1]))
                 actNode = parentNode
-        return path, directions
+        return path, directions, explored
         
     
     def getDirections(self, oldX, oldY, newX, newY):
