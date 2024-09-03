@@ -1,26 +1,10 @@
 import agent
 import environment
 import random
-import openpyxl
+import csv
 import time
 import plot as plot
 
-
-def addToExcel(name, n, states, cost1, cost2, time, solution):
-    global row1
-    global row2
-    global row3
-    global row4
-    global row5
-    global row6
-    global row7
-    row1.append(name)
-    row2.append(n)
-    row3.append(states)
-    row4.append(cost1)
-    row5.append(cost2)
-    row6.append(time)
-    row7.append(solution)
 
 
 random.seed("TP3")
@@ -30,18 +14,9 @@ for i in range(0, 30):
 
 agent = agent.Agent()
 
-excelBook = openpyxl.Workbook()
-#Se selecciona la hoja activa
-sheet = excelBook.active
-#Se colocan las etiquetas en la primera columna
 
-row1 = ["algorithm_name"]
-row2 = ["env_n"]
-row3 = ["states_n"]
-row4 = ["cost_e1"]
-row5 = ["cost_e2"]
-row6 = ["time"]
-row7 = ["solution_found"]
+rows = [["algorithm_name", "env_n", "states_n", "cost_e1", "cost_e2", "time", "solution_found"]]
+
 
 resultsState = []
 resultsDirections = []
@@ -61,10 +36,9 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
     actions = agent.countActions(directions)
-    addToExcel("BFS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0)
+    rows.append(["BFS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0])
     resultsState.append(path)
     resultsDirections.append(directions)
-
     if path != []:
         timeResults.append(executionTime)
         exploredResults.append(len(explorados))
@@ -90,8 +64,7 @@ for i in range(0, 30):
     executionTime = end - start
 
     actions = agent.countActions(directions)
-    addToExcel("DFS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0)
-
+    rows.append(["DFS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0])
     resultsState.append(path)
     resultsDirections.append(directions)
 
@@ -119,7 +92,7 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
     actions = agent.countActions(directions)
-    addToExcel("DLS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0)
+    rows.append(["DLS", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0])
 
     resultsState.append(path)
     resultsDirections.append(directions)
@@ -148,7 +121,7 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
 
-    addToExcel("UCS_e1", i + 1, len(path), len(directions), "No aplica", executionTime, 1 if path != [] else 0)
+    rows.append(["UCS_e1", i + 1, len(path), len(directions), "No aplica", executionTime, 1 if path != [] else 0])
 
     resultsState.append(path)
     resultsDirections.append(directions)
@@ -178,7 +151,7 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
     actions = agent.countActions(directions)
-    addToExcel("UCS_e2", i + 1, len(path), "No aplica", actions, executionTime, 1 if path != [] else 0)
+    rows.append(["UCS_e2", i + 1, len(path), "No aplica", actions, executionTime, 1 if path != [] else 0])
 
     resultsState.append(path)
     resultsDirections.append(directions)
@@ -208,7 +181,7 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
     actions = agent.countActions(directions)
-    addToExcel("A*_e1", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0)
+    rows.append(["A*_e1", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0])
 
     resultsState.append(path)
     resultsDirections.append(directions)
@@ -237,7 +210,7 @@ for i in range(0, 30):
     end = time.time()
     executionTime = end - start
     actions = agent.countActions(directions)
-    addToExcel("A*_e2", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0)
+    rows.append(["A*_e2", i + 1, len(path), len(directions), actions, executionTime, 1 if path != [] else 0])
 
     if path != []:
         timeResults.append(executionTime)
@@ -252,17 +225,13 @@ generalCost2Results.append(cost2Results)
 generalTimeResults.append(timeResults)
 generalExploredResults.append(exploredResults)
 
-sheet.append(row1)
-sheet.append(row2)
-sheet.append(row3)
-sheet.append(row4)
-sheet.append(row5)
-sheet.append(row6)
-sheet.append(row7)
-
-#Se guarda el archivo excel.
-excelBook.save("./results.csv")
-
+filename = "results.csv"
+with open(filename, mode='w', newline='') as file:
+    writer = csv.writer(file)
+    
+    # Escribir cada fila en el archivo CSV
+    for row in rows:
+        writer.writerow(row)
 
 plot.whiskers(generalTimeResults, "Execution Time", "Algorithm", "Time", "ExecutionTime")
 plot.whiskers(generalExploredResults, "Explored States", "Algorithm", "States", "ExploredStates")
