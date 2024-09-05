@@ -175,10 +175,10 @@ if __name__ == "__main__":
             writer.writerow(row)
 
     # Graficar los resultados
-    plot.whiskers(generalTimeResults, "Execution Time", "Algorithm", "Time", "ExecutionTime")
-    plot.whiskers(generalExploredResults, "Explored States", "Algorithm", "States", "ExploredStates")
-    plot.whiskers(generalCost1Results, "Cost Scenary 1", "Algorithm", "Cost", "Cost1")
-    plot.whiskers(generalCost2Results, "Cost Scenary 2", "Algorithm", "Cost", "Cost2")
+    plot.whiskers(generalTimeResults, "Execution Time", "Algorithm", "Time", "ExecutionTime", ["BFS", "DFS", "DLS", "UCS_e1", "UCS_e2", "A*_e1", "A*_e2", "Random"], False)
+    plot.whiskers(generalExploredResults, "Explored States", "Algorithm", "States", "ExploredStates", ["BFS", "DFS", "DLS", "UCS_e1", "UCS_e2", "A*_e1", "A*_e2", "Random"], False)
+    plot.whiskers(generalCost1Results, "Cost Scenary 1", "Algorithm", "Cost", "Cost1", ["BFS", "DFS", "UCS_e1", "A*_e1"], True)
+    plot.whiskers(generalCost2Results, "Cost Scenary 2", "Algorithm", "Cost", "Cost2", ["BFS", "DFS", "UCS_e2", "A*_e2"], True)
     plot.plotData(generalCountSolutionFound, "SolutionFound")
 
     """

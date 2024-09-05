@@ -2,7 +2,10 @@ import matplotlib.pyplot as plot
 import os
 import numpy 
 #Realiza el gráfico de cajas y extensiones. Recibe los datos a graficar, el título del gráfico, el título del eje X, el título del eje Y y el nombre del archivo donde se guardará el gráfico.
-def whiskers(data, title, x_label, y_label, filename):
+def whiskers(data, title, x_label, y_label, filename, algList, executeRemoveEmpty = False):
+    #Se eliminan los datos vacíos
+    if executeRemoveEmpty == True:
+        data = removeEmpty(data)
     #Se forma la ruta de la carpeta de imágenes
     baseDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     imagesDir = os.path.join(baseDir, 'images')
@@ -30,8 +33,7 @@ def whiskers(data, title, x_label, y_label, filename):
     #Se hace visible la cuadrícula en el gráfico
     plot.grid(True)
     #Se añaden las etiquetas a los valores del eje X
-    plot.xticks([1,2,3,4,5,6,7,8], ["BFS", "DFS", "DLS", "UCS_e1", "UCS_e2", "A*_e1", "A*_e2", "Random"])
-    #Se guarda el gráfico
+    plot.xticks([i for i in range(1, len(algList) + 1)], algList)    #Se guarda el gráfico
     plot.savefig(os.path.join(imagesDir, filename + ".png"))
     
     return 0
@@ -66,3 +68,10 @@ def plotData(results, filename):
     #Se guarda el gráfico
     plot.savefig(os.path.join(imagesDir, filename + ".png"))
     return 0
+
+def removeEmpty(data):
+    aux = []
+    for i in range(0, len(data)):
+        if data[i] != []:
+            aux.append(data[i])
+    return aux
