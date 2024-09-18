@@ -31,6 +31,8 @@ def simulatedAnnealing(environment, limit):
         if states >= limit:
             break
         T = T * 0.99
+        if T < 0.00001:
+            break
     return sol, cost, states, costList, statesList
 
 # Genera un vecino de la solución actual
