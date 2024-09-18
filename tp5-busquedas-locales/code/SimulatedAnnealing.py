@@ -14,6 +14,10 @@ def simulatedAnnealing(environment, limit):
         newCost = environment.h(newSol)
         
         if newCost == 0:
+            sol = newSol
+            cost = newCost
+            costList.append(cost)
+            statesList.append(states)
             break
         if newCost < cost:
             sol = newSol
