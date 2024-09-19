@@ -1,14 +1,7 @@
 import random
 
 def generatePopulation(n, size):
-    solutions = []
-    for i in range(0, n):
-        sol = []
-        for j in range(0, size):
-            row = random.randint(0, size - 1)
-            sol.append(row)
-        solutions.append(sol)
-    return solutions
+    return [[random.randint(0, size - 1) for _ in range(size)] for _ in range(n)]
 
 def selection(env, population, k):
     bestRes = []
@@ -33,7 +26,7 @@ def crossover(parent1, parent2):
     return child1
         
 def mutate(solution):
-    if 0.09 < random.random():
+    if 0.1 < random.random():
         return solution
     column = random.randint(0, len(solution) - 1)
     newValue = random.randint(0, len(solution) - 1)
@@ -56,8 +49,8 @@ def genetic(env, m, limit):
     while True:
         nextGenPopulation = []
         for i in range(0, len(population)):
-            st1 = selection(env, population, 4)
-            st2 = selection(env, population, 4)
+            st1 = selection(env, population, 10)
+            st2 = selection(env, population, 10)
             iter += 1
             child = crossover(st1, st2)
             child = mutate(child)

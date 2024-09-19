@@ -23,11 +23,11 @@ if __name__ == "__main__":
     
 
     hcResults = []
-    hcCostTimeStates = [[0], [], []]
+    hcCostTimeStates = [[0], [], [], [0]]
     saResults = []
-    saCostTimeStates = [[0], [], []]
+    saCostTimeStates = [[0], [], [], [0]]
     geResults = []
-    geCostTimeStates = [[0], [], []]
+    geCostTimeStates = [[0], [], [], [0]]
     costLists = []
     saStateList = []
     geStateList = []
@@ -42,6 +42,8 @@ if __name__ == "__main__":
         hcCostTimeStates[1].append(end - start)
         hcCostTimeStates[2].append(states)
         hcResults.append(["HillClimbing", envList[i].n,  sol, cost, states, end - start])
+        if cost == 0:
+            hcCostTimeStates[3][len(hcCostTimeStates[3]) - 1] = hcCostTimeStates[3][len(hcCostTimeStates[3]) - 1] + 1
 
         start = time.time()
         sol, cost, states, costList2, statesList = SimulatedAnnealing.simulatedAnnealing(envList[i], 5000)
@@ -51,6 +53,9 @@ if __name__ == "__main__":
         saCostTimeStates[2].append(states)
         saResults.append(["SimulatedAnnealing", envList[i].n, sol, cost, states, end - start])
         
+        if cost == 0:
+            saCostTimeStates[3][len(saCostTimeStates[3]) - 1] = saCostTimeStates[3][len(saCostTimeStates[3]) - 1] + 1
+
         start = time.time()
         sol, cost, states, statesList2, costList3, generationCostList = Genetic.genetic(envList[i], 100, 100)
         end = time.time()
@@ -59,6 +64,9 @@ if __name__ == "__main__":
         geCostTimeStates[2].append(states)
         geResults.append(["Genetic", envList[i].n, sol, cost, states, end - start])
         
+        if cost == 0:
+            geCostTimeStates[3][len(geCostTimeStates[3]) - 1] = geCostTimeStates[3][len(geCostTimeStates[3]) - 1] + 1
+
         if count == 30:
             count = 0
             saCostTimeStates[0][len(saCostTimeStates[0]) - 1] = saCostTimeStates[0][len(saCostTimeStates[0]) - 1] / 30
@@ -68,6 +76,14 @@ if __name__ == "__main__":
                 saCostTimeStates[0].append(0)
                 hcCostTimeStates[0].append(0)
                 geCostTimeStates[0].append(0)
+            
+            saCostTimeStates[3][len(saCostTimeStates[3]) - 1] = saCostTimeStates[3][len(saCostTimeStates[3]) - 1] / 30
+            hcCostTimeStates[3][len(hcCostTimeStates[3]) - 1] = hcCostTimeStates[3][len(hcCostTimeStates[3]) - 1] / 30
+            geCostTimeStates[3][len(geCostTimeStates[3]) - 1] = geCostTimeStates[3][len(geCostTimeStates[3]) - 1] / 30
+            if envList[i].n != 15:
+                saCostTimeStates[3].append(0)
+                hcCostTimeStates[3].append(0)
+                geCostTimeStates[3].append(0)
 
         if costLists == [] and envList[i].n == 8:
             costLists.append(costList)
@@ -84,7 +100,10 @@ if __name__ == "__main__":
     plot.plotData(geGenerationsList, "GeneticAlgorithmHWithGenerations", [i for i in range(1, len(geGenerationsList) + 1)], "Función H para Genetic Algorithm con n = 8 con generaciones", "Generación", "Costo", 10, 6)
     plot.plotData(hcCostTimeStates[0], "HillClimbingCosts", [4, 8, 10, 12, 15], "Costo promedio de Hill Climbing para cada environment", "n", "Costo", 10, 6)
     plot.plotData(saCostTimeStates[0], "SimulatedAnnealingCosts", [4, 8, 10, 12, 15], "Costo promedio de Simulated Annealing para cada environment", "n", "Costo", 10, 6)
-    plot.plotData(saCostTimeStates[0], "GeneticAlgorithmCosts", [4, 8, 10, 12, 15], "Costo promedio de Genetic Algorithm para cada environment", "n", "Costo", 10, 6)
+    plot.plotData(geCostTimeStates[0], "GeneticAlgorithmCosts", [4, 8, 10, 12, 15], "Costo promedio de Genetic Algorithm para cada environment", "n", "Costo", 10, 6)
+    plot.plotData(hcCostTimeStates[3], "HillClimbingSuccess", [4, 8, 10, 12, 15], "Promedio de éxitos para hill climbing por entorno", "n", "éxitos", 10, 6)
+    plot.plotData(saCostTimeStates[3], "SimulatedAnnealingSuccess", [4, 8, 10, 12, 15], "Promedio de éxitos para simulated annealing por entorno", "n", "éxitos", 10, 6)
+    plot.plotData(geCostTimeStates[3], "GeneticAlgorithmSuccess", [4, 8, 10, 12, 15], "Promedio de éxitos para genetic algorithm por entorno", "n", "éxitos", 10, 6)
     plot.whiskers([hcCostTimeStates[1], saCostTimeStates[1], geCostTimeStates[1]], "Execution Time", "Algorithm", "Tiempo de ejecución", "ExecutionTime", ["HillClimbing", "SimulatedAnnealing", "GeneticAlgorithm"])
     plot.whiskers([hcCostTimeStates[2], saCostTimeStates[2], geCostTimeStates[2]], "States", "Algorithm", "Estados", "States", ["HillClimbing", "SimulatedAnnealing", "GeneticAlgorithm"])
 
