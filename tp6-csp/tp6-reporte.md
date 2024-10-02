@@ -68,3 +68,7 @@ El siguiente es un gráfico de dispersión que nos muestra el porcentaje de vece
 Se realizó el mismo gráfico pero para el algoritmo CSP con Forward Checking.
 ![OptimalWithForwardChecking](images/OptimalWithForwardChecking.png)
 
+Los datos presentados en los últimos dos gráficos pueden ser visualizados en la siguiente tabla
+![Table](images/table.png)
+
+Teniendo en cuenta los resultados obtenidos creo que la implementación con Forward Checking es superior en todo sentido. Es decir, es más rápida y reduce enormemente la cantidad de iteraciones realizadas para llegar a la solución. Además, todavía sería posible de mejorar si se implementara junto a alguna heurística (Por ejemplo empezar desde la fila con más restricciones) ya que por el momento no se implementó con ninguna.
