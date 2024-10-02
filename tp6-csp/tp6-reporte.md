@@ -50,3 +50,21 @@ Se supone que el csp cuyo grafo de restricciones es un árbol es 2-consistente. 
 Otra característica es que los arcos entre padres e hijos son consistentes, esto quiere decir que si elegimos cualquier valor para el padre, existirá algún valor válido para el hijo. Además, se puede realizar de manera que se verifique la consistencia de las restricciones de los hijos antes de llegar a un nodo padre. Teniendo en cuenta esto, para cualquier Xi, al llegar a este nodo, ya se habrá confirmado la consistencia de las restricciones con los hijos. Entonces, todas las restricciones (Xi, Xk) son consistentes. Además, por el orden de verificación de restricciones (hijos, luego padres), al verificar las restricciones con los padres de Xi podemos asegurar que serán consistentes. Finalmente, esto nos indica que para un conjunto de n-1 variables, siempre se puede asignar un valor a la n-ésima variable cumpliendo las restricciones, siendo n-consistente.
 b)
 Esto es suficiente ya que si logramos que todas las variables sean consistentes, se elimina cualquier inconsistencia y se puede asegurar que existe una asignación que cumple con todas las restricciones del problema. 
+
+
+### Ejercicio 6 y 7
+
+Se realizaron los dos algoritmos solicitados. Se presentan los gráficos correspondientes.  
+
+En este gráfico se presentan diagramas de cajas y extensiones en donde se ven los tiempos de ejecución de los 2 algoritmos. Para su realización se tuvieron en cuenta todos los tamaños de entorno.
+![ExecutionTime](images/ExecutionTime.png)
+
+Para el siguiente gráfico nuevamente se tomaron en cuenta todos los tamaños dados. En los diagramas de cajas se muestran las iteraciones que se realizaron hasta llegar al resultado.
+![Iterations](images/Iterations.png)
+
+El siguiente es un gráfico de dispersión que nos muestra el porcentaje de veces que el algoritmo de CSP con Backtracking encontró el resultado óptimo para cada tamaño de entorno.
+![OptimalWithBacktracking](images/OptimalWithBacktracking.png)
+
+Se realizó el mismo gráfico pero para el algoritmo CSP con Forward Checking.
+![OptimalWithForwardChecking](images/OptimalWithForwardChecking.png)
+
