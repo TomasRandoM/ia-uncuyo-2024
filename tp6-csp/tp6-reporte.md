@@ -56,12 +56,18 @@ Esto es suficiente ya que si logramos que todas las variables sean consistentes,
 
 Se realizaron los dos algoritmos solicitados. Se presentan los gráficos correspondientes.  
 
+#### Tiempos de ejecución
 En este gráfico se presentan diagramas de cajas y extensiones en donde se ven los tiempos de ejecución de los 2 algoritmos. Para su realización se tuvieron en cuenta todos los tamaños de entorno.
 ![ExecutionTime](images/ExecutionTime.png)
 
-Para el siguiente gráfico nuevamente se tomaron en cuenta todos los tamaños dados. En los diagramas de cajas se muestran las iteraciones que se realizaron hasta llegar al resultado.
-![Iterations](images/Iterations.png)
+#### Estados visitados
+Para el siguiente gráfico nuevamente se tomaron en cuenta todos los tamaños dados. En los diagramas se muestra la cantidad de estados visitados para cada tamaño de entorno. El primer gráfico se corresponde con la implementación con Backtracking y el segundo con la de Forward Checking
+![StatesBacktracking](images/StatesWithBacktracking.png)
+![StatesForwardChecking](images/StatesWithForwardChecking.png)
 
+Podemos ver que hay una mejora muy grande al realizar la ejecución del Forward Checking.
+
+#### Porcentaje de veces que se encontró el óptimo
 El siguiente es un gráfico de dispersión que nos muestra el porcentaje de veces que el algoritmo de CSP con Backtracking encontró el resultado óptimo para cada tamaño de entorno.
 ![OptimalWithBacktracking](images/OptimalWithBacktracking.png)
 
