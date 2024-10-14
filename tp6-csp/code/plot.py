@@ -21,8 +21,6 @@ def whiskers(data, title, x_label, y_label, filename, algList, executeRemoveEmpt
             continue
         std = numpy.std(dataset)
         mean = numpy.mean(dataset)
-        
-        plot.errorbar(x=i, y=mean, yerr=std, fmt='o', color='red', capsize=5)
 
     #Se añade el título
     plot.title(title)
