@@ -1,0 +1,67 @@
+---
+title: "TP7"
+output: html_tp7
+---
+
+Se lee el archivo arbolado-mza-dataset.csv y se crean dos archivos nuevos "arbolado-mendoza-dataset-validation.csv" y "arbolado-mendoza-dataset-train.csv" que contienen el 20% y 80% de los datos respectivamente.
+
+```{r}
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+set.seed(2024)
+index80 <- sample(seq_len(nrow(data)), floor(0.80 * nrow(data)))
+validation <- data[index80, ]
+dataTrain <- data[-index80, ]
+write.csv(validation, file = "../../data/arbolado-mendoza-dataset-validation.csv")
+write.csv(dataTrain, file = "../../data/arbolado-mendoza-dataset-train.csv")
+
+```
+
+En esta sección se crean los gráficos necesarios para responder el punto 2 del TP7. Los diagramas generados se guardan en la carpeta images.
+
+```{r}
+library(ggplot2)
+png("../../images/HistogramaInclinacionPeligrosa.png", width = 800, height = 600)
+hist(dataTrain$inclinacion_peligrosa, main = "Histograma de inclinación_peligrosa", xlab = "Frecuencia")
+dev.off()
+g1 <- ggplot(dataTrain, aes(x = factor(seccion), fill = factor(inclinacion_peligrosa))) + 
+         geom_bar(position = "dodge") + 
+         labs(title = "Inclinación peligrosa por sección", x = "sección", y = "cantidad") +
+          scale_fill_manual(values = c("0" = "blue", "1" = "red"))
+
+g2 <- ggplot(dataTrain, aes(x = especie, fill = factor(inclinacion_peligrosa))) + 
+         geom_bar(position = "dodge", width = 0.7) + 
+         labs(title = "Inclinación peligrosa por especie", x = "especie", y = "cantidad") +
+         scale_fill_manual(values = c("0" = "blue", "1" = "red")) +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0, hjust=1, size = 8))
+
+ggsave("../../images/InclinacionSeccion.png", plot = g1, width = 8, height = 6, dpi = 300)
+
+ggsave("../../images/InclinacionEspecie.png", plot = g2, width = 8, height = 6, dpi = 300)
+
+```
+
+En la siguiente sección se realizan los procedimientos necesarios para el punto 3.
+
+```{r}
+png("../../images/HistogramaCircTroncCm.png", width = 800, height = 600)
+par(mfcol = c(2, 2)) 
+hist(dataTrain$circ_tronco_cm, main = "Histograma para circ_tronco_cm con 5 bins", xlab = "cm", breaks = 5)
+hist(dataTrain$circ_tronco_cm, main = "Histograma para circ_tronco_cm con 15 bins", xlab = "cm", breaks = 15)
+hist(dataTrain$circ_tronco_cm, main = "Histograma para circ_tronco_cm con 25 bins", xlab = "cm", breaks = 25)
+hist(dataTrain$circ_tronco_cm, main = "Histograma para circ_tronco_cm con 35 bins", xlab = "cm", breaks = 35)
+dev.off()
+
+png("../../images/HistogramaCircTroncPorInclinacion.png", width = 800, height = 800)
+par(mfcol = c(2, 1))
+
+hist(dataTrain$circ_tronco_cm[dataTrain$inclinacion_peligrosa == 1], main = "Histograma para circ_tronco_cm con 35 bins e inclinación peligrosa afirmativa", xlab = "cm", ylab = "frecuencia", breaks = 35)
+
+hist(dataTrain$circ_tronco_cm[dataTrain$inclinacion_peligrosa == 0], main = "Histograma para circ_tronco_cm con 35 bins e inclinación peligrosa negativa", xlab = "cm", ylab = "frecuencia", breaks = 35)
+dev.off()
+
+
+dataTrain$circ_tronco_cm_cat <- cut(dataTrain$circ_tronco_cm, breaks = c(-Inf, 85, 175, 255, Inf), labels = c("bajo", "medio", "alto", "muy alto"))
+
+write.csv(dataTrain, file = "../../data/arbolado-mendoza-dataset-circ_tronco_cm-train.csv")
+```
+
