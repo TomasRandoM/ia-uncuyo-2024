@@ -44,7 +44,7 @@ cross_validation <- function(dataFrame, num) {
 
   | Métrica | Media| Desviación Estándar| 
   |----------| -------- | --------- | 
-  | Accuracy | 0.887830711191566 | 0.0145961180474949 |
+  | Accuracy | 0.887853002245806 | 0.00751913036297008|
   | Precision | NA | NA |
   | Sensitivity | 0 | 0 |
   | Specificity | 1 | 0 |

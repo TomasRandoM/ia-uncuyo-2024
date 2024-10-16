@@ -91,7 +91,11 @@ createConfusionMatrix <- function(dataFrame) {
   
   falseNegatives <- dataFrame %>% filter(prediction_class == 0 & inclinacion_peligrosa == 1) %>% count()
   
-  dataVector <- c(trueNegatives, falsePositives, falseNegatives, truePositives)
+  print(trueNegatives)
+  print(falsePositives)
+  print(falseNegatives)
+  print(truePositives)
+  dataVector <- c(trueNegatives, falseNegatives, falsePositives, truePositives)
   
   matriz <- matrix(as.numeric(dataVector), nrow = 2, ncol = 2)
   
@@ -202,7 +206,7 @@ newCalculateMetrics <- function(data) {
   return(data.frame(Accuracy = ac, Precision = pr, Sensitivity = se, Specificity = sp))
 }
 library(rpart)
-dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
 
 create_folds <- function(dataFrame, num) {
   indexes <- sample(1: nrow(dataFrame))
@@ -213,7 +217,7 @@ create_folds <- function(dataFrame, num) {
 
 cross_validation <- function(dataFrame, num) {
   dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
-  train_formula<-formula(inclinacion_peligrosa~diametro_tronco + altura)
+  train_formula<-formula(inclinacion_peligrosa~ altura + diametro_tronco + seccion)
 
   folds <- create_folds(dataFrame, num)
 
@@ -237,6 +241,7 @@ cross_validation <- function(dataFrame, num) {
 
 res <- cross_validation(dataValidation, 10)
 
+print(res$matrices[[2]])
 met <- lapply(res$matrices, newCalculateMetrics)
 final <- do.call(rbind, met)
 write.csv(final, file = "../metrics.csv")
