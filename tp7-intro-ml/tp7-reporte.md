@@ -14,9 +14,9 @@
 ##### 2) Explain whether each scenario is a classification or regression problem, and indicate whether we are most interested in inference or prediction. Finally, provide n and p.
 
 
-- a) Estamos ante un problema de regresión y estamos interesados en la inferencia (ya que queremos entender los factores que afectan el salario del CEO). n = 500, p = 4.
-- b) Es un problema de clasificación y estamos interesados en la predicción (Si será exitoso o no). n = 20, p = 14.
-- c) Es un problema de regresión y estamos interesados en la predicción. n = 48, p = 4.
+- a) Estamos ante un problema de regresión y estamos interesados en la inferencia (ya que queremos entender los factores que afectan el salario del CEO). n = 500, p = 3.
+- b) Es un problema de clasificación y estamos interesados en la predicción (Si será exitoso o no). n = 20, p = 13.
+- c) Es un problema de regresión y estamos interesados en la predicción. n = 52, p = 3.
 
 
 ##### 5) What are the advantages and disadvantages of a very flexible (versus a less flexible) approach for regression or classification? Under what circumstances might a more flexible approach be preferred to a less flexible approach? When might a less flexible approach be preferred?
