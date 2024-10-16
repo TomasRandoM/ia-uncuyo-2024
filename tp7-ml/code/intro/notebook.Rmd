@@ -9,8 +9,8 @@ Se lee el archivo arbolado-mza-dataset.csv y se crean dos archivos nuevos "arbol
 data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
 set.seed(2024)
 index80 <- sample(seq_len(nrow(data)), floor(0.80 * nrow(data)))
-validation <- data[index80, ]
-dataTrain <- data[-index80, ]
+dataTrain <- data[index80, ]
+validation <- data[-index80, ]
 write.csv(validation, file = "../../data/arbolado-mendoza-dataset-validation.csv")
 write.csv(dataTrain, file = "../../data/arbolado-mendoza-dataset-train.csv")
 
@@ -64,4 +64,214 @@ dataTrain$circ_tronco_cm_cat <- cut(dataTrain$circ_tronco_cm, breaks = c(-Inf, 8
 
 write.csv(dataTrain, file = "../../data/arbolado-mendoza-dataset-circ_tronco_cm-train.csv")
 ```
+
+En esta sección se resolverá el punto 4 del trabajo práctico.
+```{r}
+library(dplyr)
+generateRandomProb <- function(dataFrame) {
+  dataFrame$prediction_prob <- runif(nrow(dataFrame), max = 1, min = 0)
+  return(dataFrame)
+}
+
+random_classifier <- function(dataFrame) {
+  dataFrame$prediction_class <- ifelse(dataFrame$prediction_prob > 0.5, 1, 0)
+  return(dataFrame)
+}
+
+dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+
+dataValidation <- random_classifier(generateRandomProb(dataValidation))
+
+createConfusionMatrix <- function(dataFrame) {
+  truePositives <- dataFrame %>% filter(prediction_class == 1 & inclinacion_peligrosa ==1) %>% count()
+  
+  trueNegatives <- dataFrame %>% filter(prediction_class == 0 & inclinacion_peligrosa == 0) %>% count()
+  
+  falsePositives <- dataFrame %>% filter(prediction_class == 1 & inclinacion_peligrosa == 0) %>% count()
+  
+  falseNegatives <- dataFrame %>% filter(prediction_class == 0 & inclinacion_peligrosa == 1) %>% count()
+  
+  dataVector <- c(trueNegatives, falsePositives, falseNegatives, truePositives)
+  
+  matriz <- matrix(as.numeric(dataVector), nrow = 2, ncol = 2)
+  
+  colnames(matriz) <- c("Predicted No", "Predicted Yes")
+  rownames(matriz) <- c("Actual No", "Actual Yes")
+  return(matriz)
+}
+
+
+matriz1 <- createConfusionMatrix(dataValidation)
+
+print(matriz1)
+```
+En la siguiente sección se brinda el código necesario para resolver el punto 5.
+
+```{r}
+biggerclass_classifier <- function(dataFrame) {
+  majority <- ifelse(sum(data$inclinacion_peligrosa == 1) < sum(data$inclinacion_peligrosa == 0), 0, 1)
+  
+  dataFrame$prediction_class <- majority
+  return(dataFrame)
+}
+
+dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+
+dataValidation <- biggerclass_classifier(dataValidation)
+
+matriz2 <- createConfusionMatrix(dataValidation)
+
+print(matriz2)
+```
+En la siguiente sección se realizan las funciones solicitadas en el punto 6 del trabajo práctico.
+
+```{r}
+Accuracy <- function(matrix) {
+  accu <- (matrix[2,2] + matrix[1,1]) / (matrix[1,1] + matrix[1,2] + matrix[2,1] + matrix[2,2])
+  return(accu)
+}
+
+Precision <- function(matrix) {
+  prec <- matrix[2,2] / (matrix[2,2] + matrix[1,2])
+  return(prec)
+}
+
+Sensitivity <- function(matrix) {
+  sens <- matrix[2,2] / (matrix[2,2] + matrix[2,1])
+  return(sens)
+}
+
+Specificity <- function(matrix) {
+  spec <- matrix[1,1] / (matrix[1,1] + matrix[1,2]) 
+  return(spec)
+}
+
+calculateMetrics <- function(matrix) {
+  ac <- Accuracy(matrix)
+  pr <- Precision(matrix)
+  se <- Sensitivity(matrix)
+  sp <- Specificity(matrix)
+  rta <- c(ac, pr, se, sp)
+  names(rta) <- c("Accuracy", "Precision", "Sensitivity", "Specificity")
+  return(rta)
+}
+
+metrics1 <- calculateMetrics(matriz1)
+metrics2 <- calculateMetrics(matriz2)
+
+print(metrics1)
+print(metrics2)
+
+```
+En la siguiente sección se presentan el código realizado para el punto 7 del TP7.
+
+```{r}
+new_confusion_matrix <- function(inclinacion, predict) {
+  truePos <- sum((inclinacion == 1) & (predict == 1))
+  trueNeg <- sum((inclinacion == 0) & (predict == 0))
+  falsePos <- sum((inclinacion == 0) & (predict == 1))
+  falseNeg <- sum((inclinacion == 1) & (predict == 0))
+  return(data.frame(True_Positive = truePos, True_Negative = trueNeg, False_Positive = falsePos, False_Negative = falseNeg))
+} 
+
+newAccuracy <- function(dataFrame) {
+  accu <- (dataFrame$True_Positive + dataFrame$True_Negative) / (dataFrame$True_Negative + dataFrame$False_Positive + dataFrame$False_Negative + dataFrame$True_Positive)
+  return(accu)
+}
+
+newPrecision <- function(dataFrame) {
+  prec <- dataFrame$True_Positive / (dataFrame$True_Positive + dataFrame$False_Positive)
+  return(prec)
+}
+
+newSensitivity <- function(dataFrame) {
+  sens <- dataFrame$True_Positive / (dataFrame$True_Positive + dataFrame$False_Negative)
+  return(sens)
+}
+
+newSpecificity <- function(dataFrame) {
+  spec <- dataFrame$True_Negative / (dataFrame$True_Negative + dataFrame$False_Positive)
+  return(spec)
+}
+
+newCalculateMetrics <- function(data) {
+  ac <- newAccuracy(data)
+  pr <- newPrecision(data)
+  se <- newSensitivity(data)
+  sp <- newSpecificity(data)
+  return(data.frame(Accuracy = ac, Precision = pr, Sensitivity = se, Specificity = sp))
+}
+library(rpart)
+dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+  train_formula<-formula(inclinacion_peligrosa~diametro_tronco + altura)
+
+  folds <- create_folds(dataFrame, num)
+
+  predicList <- list()
+  matrixList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<-rpart(train_formula,data=trainData)
+
+	  p<-predict(tree_model,valData,type='class') 
+    maAux <- new_confusion_matrix(valData$inclinacion_peligrosa, p)
+    matrixList[[i]] <- maAux
+	  predicList[[paste0("Fold", i)]] <- p
+  }
+  return(list(predictions = predicList, matrices = matrixList))
+}
+
+res <- cross_validation(dataValidation, 10)
+
+met <- lapply(res$matrices, newCalculateMetrics)
+final <- do.call(rbind, met)
+write.csv(final, file = "../metrics.csv")
+
+mediaAc <- mean(final$Accuracy, na.rm = TRUE)
+mediaPr <- mean(final$Precision, na.rm = TRUE)
+mediaSe <- mean(final$Sensitivity, na.rm = TRUE)
+mediaSp <- mean(final$Specificity, na.rm = TRUE)
+
+desviacionAc <- sd(final$Accuracy, na.rm = TRUE)
+desviacionPr <- sd(final$Precision, na.rm = TRUE)
+desviacionSe <- sd(final$Sensitivity, na.rm = TRUE)
+desviacionSp <- sd(final$Specificity, na.rm = TRUE)
+
+metricasMean <- data.frame(
+  Metrica = c("Accuracy", "Precision", "Sensitivity", "Specificity"),
+  Media = c(mediaAc, mediaPr, mediaSe, mediaSp),
+  Desviacion = c(desviacionAc, desviacionPr, desviacionSe, desviacionSp)
+)
+
+write.csv(metricasMean, file = "../metricsMean.csv")
+
+#dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+#dataTrain <- read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+#train_formula<-formula(inclinacion_peligrosa~diametro_tronco + altura)
+
+#dataValidation$inclinacion_peligrosa <- as.factor(dataValidation$inclinacion_peligrosa)
+#print(dataValidation)
+#dataTrain$inclinacion_peligrosa <- as.factor(dataTrain$inclinacion_peligrosa)
+#tree_model<-rpart(train_formula,data=dataTrain)
+
+#p<-predict(tree_model,dataValidation,type='class') 
+#print(p)
+
+```
+
+
 
