@@ -170,6 +170,7 @@ print(metrics2)
 En la siguiente sección se presentan el código realizado para el punto 7 del TP7.
 
 ```{r}
+library(ROSE)
 new_confusion_matrix <- function(inclinacion, predict) {
   truePos <- sum((inclinacion == 1) & (predict == 1))
   trueNeg <- sum((inclinacion == 0) & (predict == 0))
@@ -206,7 +207,7 @@ newCalculateMetrics <- function(data) {
   return(data.frame(Accuracy = ac, Precision = pr, Sensitivity = se, Specificity = sp))
 }
 library(rpart)
-dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
 
 create_folds <- function(dataFrame, num) {
   indexes <- sample(1: nrow(dataFrame))
@@ -217,7 +218,7 @@ create_folds <- function(dataFrame, num) {
 
 cross_validation <- function(dataFrame, num) {
   dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
-  train_formula<-formula(inclinacion_peligrosa~ altura + diametro_tronco + seccion)
+  train_formula<-formula(inclinacion_peligrosa~ altura + diametro_tronco + seccion )
 
   folds <- create_folds(dataFrame, num)
 
@@ -239,12 +240,23 @@ cross_validation <- function(dataFrame, num) {
   return(list(predictions = predicList, matrices = matrixList))
 }
 
+
+dataFrame <- dataValidation
+dataFrame <- dataFrame %>%
+group_by(especie) %>%
+filter(n() > 1) %>%
+ungroup()
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+dataValidation <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+options(max.print = 20000)
+print(dataValidation)
 res <- cross_validation(dataValidation, 10)
 
-print(res$matrices[[2]])
 met <- lapply(res$matrices, newCalculateMetrics)
 final <- do.call(rbind, met)
-write.csv(final, file = "../metrics.csv")
+write.csv(final, file = "./metricsDataOverSample.csv")
 
 mediaAc <- mean(final$Accuracy, na.rm = TRUE)
 mediaPr <- mean(final$Precision, na.rm = TRUE)
@@ -262,7 +274,34 @@ metricasMean <- data.frame(
   Desviacion = c(desviacionAc, desviacionPr, desviacionSe, desviacionSp)
 )
 
-write.csv(metricasMean, file = "../metricsMean.csv")
+write.csv(metricasMean, file = "./metricsOverSample.csv")
+
+n = nrow(min) * 2
+
+dataValidation <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n)$data
+res <- cross_validation(dataValidation, 20)
+
+
+met <- lapply(res$matrices, newCalculateMetrics)
+final <- do.call(rbind, met)
+write.csv(final, file = "./metricsDataUnderSample.csv")
+
+mediaAc <- mean(final$Accuracy, na.rm = TRUE)
+mediaPr <- mean(final$Precision, na.rm = TRUE)
+mediaSe <- mean(final$Sensitivity, na.rm = TRUE)
+mediaSp <- mean(final$Specificity, na.rm = TRUE)
+
+desviacionAc <- sd(final$Accuracy, na.rm = TRUE)
+desviacionPr <- sd(final$Precision, na.rm = TRUE)
+desviacionSe <- sd(final$Sensitivity, na.rm = TRUE)
+desviacionSp <- sd(final$Specificity, na.rm = TRUE)
+
+metricasMean <- data.frame(
+  Metrica = c("Accuracy", "Precision", "Sensitivity", "Specificity"),
+  Media = c(mediaAc, mediaPr, mediaSe, mediaSp),
+  Desviacion = c(desviacionAc, desviacionPr, desviacionSe, desviacionSp)
+)
+write.csv(metricasMean, file = "./metricsUnderSample.csv")
 
 #dataValidation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
 #dataTrain <- read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
