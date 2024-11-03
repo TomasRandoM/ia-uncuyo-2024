@@ -5,7 +5,8 @@
     - **Actuadores:** Disparar, moverse, recargar, enviar señales y apuntar.
     - **Sensores:** Posiciones de los jugadores, información en el mapa, campo visual, sonidos
 
-Es parcialmente observable, multiagente, dinámico y continuo.
+Es parcialmente observable, multiagente, dinámico y continuo.  
+
 
 2. Explorar los océanos
     - **Performance:**
@@ -14,14 +15,16 @@ Es parcialmente observable, multiagente, dinámico y continuo.
     - **Actuadores:** Moverse, cámara
     - **Sensores:** Profundidad, GPS, presión, movimiento, sonares
       
-Es parcialmente observable, multiagente, dinámico y continuo.
+Es parcialmente observable, multiagente, dinámico y continuo.  
+
 3. Comprar y vender tokens crypto
     - **Performance:** Ganancias en cierto período de tiempo, cantidad de operaciones que se realizan
     - **Entorno:** Mercado de criptomonedas
     - **Actuadores:** Vender, comprar, holdear
     - **Sensores:** Variación de precios, tendencias  
         
-Es parcialmente observable, multiagente, dinámico y discreto.
+Es parcialmente observable, multiagente, dinámico y discreto.  
+
 
 4. Practicar tenis contra una pared
     - **Performance:** Cantidad de golpes realizados, tiempo transcurrido antes de fallar
@@ -30,14 +33,16 @@ Es parcialmente observable, multiagente, dinámico y discreto.
     - **Sensores:** Movimiento, velocidad
         
            
-Es totalmente observable, un solo agente, estático y continuo.
+Es totalmente observable, un solo agente, estático y continuo.  
+
 5. Realizar un salto de altura.
     - **Performance:** Altura alcanzada, cantidad de saltos realizados
     - **Entorno:** Lugar de salto
     - **Actuadores:** Saltar, aterrizar
     - **Sensores:** Altura, posición, velocidad   
               
-Es totalmente observable, un solo agente, estático y continuo.
+Es totalmente observable, un solo agente, estático y continuo.  
+
 
 6. Pujar por un artículo en una subasta
     - **Performance:** Precio alcanzado, cantidad de objetos adquiridos
