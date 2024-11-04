@@ -1,0 +1,52 @@
+---
+title: "Kaggle challenge"
+output: kaggle_notebook
+---
+
+```{r}
+library(dplyr)
+library(ROSE)
+
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+
+
+dataFrame <- data
+dataFrame <- dataFrame %>%
+group_by(especie) %>%
+filter(n() > 1) %>%
+ungroup()
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+dataOver <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+
+n = nrow(min) * 2
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n)$data
+```
+
+```{r}
+library(ranger)
+library(pROC)
+set.seed(2024)
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n * 3.8)$data
+
+dataUnder$weights <- ifelse(dataUnder$inclinacion_peligrosa == 1, 2, 1)
+
+dataUnder$altura <- as.factor(dataUnder$altura)
+dataUnder$especie <- as.factor(dataUnder$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+dataUnder$seccion <- as.factor(dataUnder$seccion)
+
+tree_model<- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long  + seccion, data = dataUnder, num.trees = 3000, num.threads = 4, mtry = 2, min.node.size = 3, sample.fraction = 0.5, case.weights = dataUnder$weights, max.depth = 16)
+
+prediccionesUnder <- predict(tree_model, data = test)$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestDefFinalSi10.csv", row.names = FALSE)
+```
+

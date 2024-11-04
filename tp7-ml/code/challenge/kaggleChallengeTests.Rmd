@@ -1,0 +1,610 @@
+---
+title: "Pruebas Kaggle challenge"
+output: kaggle_notebook
+---
+
+Se resuelve el ejercicio de Kaggle para la materia de Inteligencia Artificial I. En la primera sección se cargarán los datos y se modificarán removiendo las filas que tengan alguna especie que solo aparezca una vez en todo el conjunto. Además, se realizará oversampling y undersampling para balancear las clases.
+
+```{r}
+library(dplyr)
+library(ROSE)
+
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+
+
+dataFrame <- data
+dataFrame <- dataFrame %>%
+group_by(especie) %>%
+filter(n() > 1) %>%
+ungroup()
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+dataOver <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+
+n = nrow(min) * 2
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n)$data
+
+
+
+```
+```{r}
+library(ranger)
+set.seed(2024)
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n * 3.8)$data
+
+#dataUnder$inclinacion_peligrosa <- as.factor(dataUnder$inclinacion_peligrosa)
+#dataUnder$especie <- as.factor(dataUnder$especie)
+#dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+#dataUnder$seccion <- as.factor(dataUnder$seccion)
+
+dataUnder$altura <- as.factor(dataUnder$altura)
+dataUnder$especie <- as.factor(dataUnder$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+dataUnder$seccion <- as.factor(dataUnder$seccion)
+
+tree_model<- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long  + seccion, data = dataUnder, num.trees = 700000, num.threads = 4, mtry = 2, min.node.size = 3, sample.fraction = 0.5, max.depth = 16)
+
+prediccionesUnder <- predict(tree_model, data = test)$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestDefFinalSi2.csv", row.names = FALSE)
+
+
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataUnder, num.trees = 30000, num.threads = 6, mtry = 4)
+#prediccionesUnder <- predict(randomForestUnder, data = test)$predictions
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestDef2.csv", row.names = FALSE)
+
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataUnder, num.trees = 30000, num.threads = 6, mtry = 3)
+#prediccionesUnder <- predict(randomForestUnder, data = test)$predictions
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestDef3.csv", row.names = FALSE)
+
+
+# randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataUnder, num.trees = 30000, num.threads = 6)
+#prediccionesUnder <- predict(randomForestUnder, data = test)$predictions
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestDef1.csv", row.names = FALSE)
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + altura + circ_tronco_cm + diametro_tronco + lat + long + seccion + nombre_seccion + area_seccion, data = dataUnder, num.trees = 300, importance = "impurity", mtry = 3)
+#import <- importance(randomForestUnder)
+#print(import)
+#prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestV3.csv", row.names = FALSE)
+
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + altura + circ_tronco_cm + lat + long, data = dataUnder, num.trees = 300, importance = "impurity", mtry = 3)
+
+#import <- importance(randomForestUnder)
+#print(import)
+#prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestV6.csv", row.names = FALSE)
+
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion + nombre_seccion + area_seccion, data = dataUnder, num.trees = 30000)
+
+#prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestV4.csv", row.names = FALSE)
+
+
+#randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + seccion + nombre_seccion + area_seccion, data = dataUnder, num.trees = 30000)
+
+#prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+#write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestV5.csv", row.names = FALSE)
+
+```
+
+
+En el siguiente fragmento se realizará la primera aproximación a la solución, es decir, se entrenará el random forest utilizando los dos dataframes formados en la anterior sección. Además, se evaluarán los datos de testeo para obtener la primera solución. 
+
+```{r}
+library(randomForest)
+library(ranger)
+library(pROC)
+
+set.seed(2024)
+
+dataOver$inclinacion_peligrosa <- as.factor(dataOver$inclinacion_peligrosa)
+dataUnder$inclinacion_peligrosa <- as.factor(dataUnder$inclinacion_peligrosa)
+
+randomForestOver <- randomForest(inclinacion_peligrosa ~ ., data = dataOver, ntree = 100)
+
+randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + altura + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataUnder, num.trees = 30000)
+
+pred_probs <- predict(randomForestUnder, dataFrame)$predictions[, 2]
+
+roc_obj <- roc(dataFrame$inclinacion_peligrosa, pred_probs)
+auc_value <- auc(roc_obj)
+print(auc_value)
+prediccionesOver <- predict(randomForestOver, newdata = test)
+
+prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesOver)
+write.csv(resultado, file = "prediccionesOverSamplingWithRandomForest.csv", row.names = FALSE)
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForest.csv", row.names = FALSE)
+```
+Los resultados hasta aquí fueron subidos y testeados en la plataforma de Kaggle, allí se pudo observar que el score obtenido con oversampling fue de 0.51, mientras que con undersampling fue de 0.70. Por este motivo, se utilizará cross-validation con undersampling para tratar de mejorar el resultado obtenido.
+
+```{r}
+library(pROC)
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+  folds <- create_folds(dataFrame, num)
+
+  aucList <- list()
+  modelList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<-randomForest(inclinacion_peligrosa ~ especie + altura + circ_tronco_cm + diametro_tronco + seccion, data = trainData, ntree = 1000)
+
+	  pred_probs <- predict(tree_model, valData, type = 'prob')[, 2]
+    
+    roc_obj <- roc(valData$inclinacion_peligrosa, pred_probs)
+    auc_value <- auc(roc_obj)
+    
+    aucList[[paste0("Fold", i)]] <- auc_value
+    modelList[[paste0("Fold", i)]] <- tree_model
+  } 
+  mejorFold <- which.max(unlist(aucList))
+  bestModel <- modelList[[mejorFold]]
+  return(bestModel)
+}
+
+model <- cross_validation(dataUnder, 10)
+prediccionesUnder <- predict(model, newdata = test)
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestCrossValidation.csv", row.names = FALSE)
+
+
+```
+```{r}
+library(ranger)
+dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+pesoPeligrosa <- 1 / sum(dataFrame$inclinacion_peligrosa == 1)
+pesoNoPeligrosa <- 1 / sum(dataFrame$inclinacion_peligrosa == 0)
+print(pesoNoPeligrosa)
+
+pesosObservaciones <- ifelse(dataFrame$inclinacion_peligrosa == 1, 0.8, 0.2)
+print(pesosObservaciones)
+
+randomForestUnder <- ranger(inclinacion_peligrosa ~ especie + altura + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataFrame, case.weights = pesosObservaciones, num.trees = 10000)
+
+
+prediccionesUnder <- predict(randomForestUnder, data = test)$prediction
+
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestAndWeights.csv", row.names = FALSE)
+
+```
+si
+```{r}
+library(pROC)
+library(randomForest)
+library(ROSE)
+library(dplyr)
+
+set.seed(2024)
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+train  <-read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+validation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+print(train)
+dataFrame <- train
+dataFrame <- dataFrame %>%
+group_by(especie) %>%
+filter(n() > 1) %>%
+ungroup()
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+dataOver <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+
+n = nrow(min) * 2
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n)$data
+
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+  folds <- create_folds(dataFrame, num)
+
+  aucList <- list()
+  modelList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<-randomForest(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = trainData, ntree = 300)
+
+	  pred_probs <- predict(tree_model, valData, type = 'prob')[, 2]
+    
+    roc_obj <- roc(valData$inclinacion_peligrosa, pred_probs)
+    auc_value <- auc(roc_obj)
+
+    aucList[[paste0("Fold", i)]] <- auc_value
+    modelList[[paste0("Fold", i)]] <- tree_model
+  } 
+  mejorFold <- which.max(unlist(aucList))
+  bestModel <- modelList[[mejorFold]]
+  return(bestModel)
+}
+
+niveles_completos <- levels(as.factor(validation$especie))
+dataUnder$especie <- factor(dataUnder$especie, levels = niveles_completos)
+validation$diametro_tronco <- as.factor(validation$diametro_tronco)
+validation$especie <- as.factor(validation$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+
+model <- cross_validation(dataUnder, 30)
+print("hola")
+prediccionesUnder <- predict(model, newdata = validation, type = 'prob')[,2]
+
+roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesUnder)
+auc_value <- auc(roc_obj)
+print(auc_value)
+
+    
+print("si")
+
+dataOver$especie <- factor(dataOver$especie, levels = niveles_completos)
+dataOver$diametro_tronco <- as.factor(dataOver$diametro_tronco)
+model <- cross_validation(dataOver, 30)
+prediccionesOver <- predict(model, newdata = validation, type = 'prob')[,2]
+
+roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesOver)
+auc_value <- auc(roc_obj)
+print(auc_value)
+
+```
+si
+```{r}
+library(pROC)
+library(randomForest)
+library(ROSE)
+library(dplyr)
+library(ranger)
+set.seed(2024)
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+train  <-read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+validation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+
+dataFrame <- train
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+dataOver <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+
+n = nrow(min) * 2
+
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n)$data
+
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+  folds <- create_folds(dataFrame, num)
+
+  aucList <- list()
+  modelList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<-randomForest(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = trainData, ntree = 300)
+
+	  pred_probs <- predict(tree_model, valData, type = 'prob')[, 2]
+    
+    roc_obj <- roc(valData$inclinacion_peligrosa, pred_probs)
+    auc_value <- auc(roc_obj)
+
+    aucList[[paste0("Fold", i)]] <- auc_value
+    modelList[[paste0("Fold", i)]] <- tree_model
+  } 
+  mejorFold <- which.max(unlist(aucList))
+  bestModel <- modelList[[mejorFold]]
+  return(bestModel)
+}
+print(dataUnder)
+nivelesCompletos <- levels(as.factor(test$especie))
+dataUnder$especie <- factor(dataUnder$especie, levels = nivelesCompletos)
+test$diametro_tronco <- as.factor(test$diametro_tronco)
+test$especie <- as.factor(test$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+dataOver$diametro_tronco <- as.factor(dataOver$diametro_tronco)
+dataOver$especie <- factor(dataOver$especie, levels = nivelesCompletos)
+dataUnder$inclinacion_peligrosa <- as.factor(dataUnder$inclinacion_peligrosa)
+dataOver$inclinacion_peligrosa <- as.factor(dataOver$inclinacion_peligrosa)
+dataOver <- na.omit(dataOver)
+
+model <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataUnder, num.trees = 300)
+prediccionesUnder <- predict(model, data = test, type="response")$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestV2.csv", row.names = FALSE)
+
+model <- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long + seccion, data = dataOver, num.trees = 300)
+prediccionesOver <- predict(model, data = test, type="response")$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesOver)
+write.csv(resultado, file = "prediccionesOverSamplingWithRandomForestV2.csv", row.names = FALSE)
+
+model <- cross_validation(dataUnder, 30)
+prediccionesUnder <- predict(model, newdata = test)
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestCrossValidatioV2.csv", row.names = FALSE)
+
+model <- cross_validation(dataOver, 30)
+prediccionesOver <- predict(model, newdata = test)
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesOver)
+write.csv(resultado, file = "prediccionesOverSamplingWithRandomForestCrossValidatioV2.csv", row.names = FALSE)
+```
+
+```{r}
+library(pROC)
+library(randomForest)
+library(ROSE)
+library(dplyr)
+library(smotefamily)
+
+set.seed(2024)
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+train  <-read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+validation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+print(train)
+dataFrame <- train
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+dataOver <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "over", N = nrow(maj) * 2)$data
+
+n = nrow(min) * 2
+n2 = n + nrow(min)
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n * 3.8)$data
+
+dataRose <- ovun.sample(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long  + seccion, data = dataFrame, p = 0.8, method = "both", N = 3.5 * n) $data
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+  folds <- create_folds(dataFrame, num)
+
+  aucList <- list()
+  modelList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long  + seccion, data = dataUnder, num.trees = 300, num.threads = 6, mtry = 3, min.node.size = 5, sample.fraction = 0.5, max.depth = 16)
+	  pred_probs <- predict(tree_model, valData)$predictions
+    
+    roc_obj <- roc(valData$inclinacion_peligrosa, pred_probs)
+    auc_value <- auc(roc_obj)
+    print(auc_value)
+
+    aucList[[paste0("Fold", i)]] <- auc_value
+    modelList[[paste0("Fold", i)]] <- tree_model
+  } 
+  mejorFold <- which.max(unlist(aucList))
+  bestModel <- modelList[[mejorFold]]
+  return(bestModel)
+}
+
+dataUnder$altura <- as.factor(dataUnder$altura)
+dataUnder$especie <- as.factor(dataUnder$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+dataUnder$seccion <- as.factor(dataUnder$seccion)
+
+dataOver$altura <- as.factor(dataOver$altura)
+dataOver$especie <- as.factor(dataOver$especie)
+dataOver$diametro_tronco <- as.factor(dataOver$diametro_tronco)
+dataOver$seccion <- as.factor(dataOver$seccion)
+
+
+model1 = cross_validation(dataUnder, 8)
+#model2 = cross_validation(dataOver, 10)
+#model3 = cross_validation(dataRose, 10)
+
+prediccionesUnder <- predict(model1, data = validation)$predictions
+print("Auc nuevo")
+roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesUnder)
+auc_value <- auc(roc_obj)
+print(auc_value)
+
+#prediccionesUnder <- predict(model2, data = validation)$predictions
+
+#roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesUnder)
+#auc_value <- auc(roc_obj)
+#print(auc_value)
+
+#prediccionesUnder <- predict(model3, data = validation)$predictions
+
+#roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesUnder)
+#auc_value <- auc(roc_obj)
+#print(auc_value)
+
+prediccionesUnder <- predict(model1, data = test)$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestCrossValidationTest.csv", row.names = FALSE)
+
+#prediccionesUnder <- predict(model2, data = test)$predictions
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+#write.csv(resultado, file = "prediccionesOverSamplingWithRandomForestCrossValidationTest2.csv", row.names = FALSE)
+
+#prediccionesUnder <- predict(model3, data = test)$predictions
+
+#resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+#write.csv(resultado, file = "prediccionesOverandUnderSamplingWithRandomForestCrossValidationTest3.csv", row.names = FALSE)
+
+
+```
+
+```{r}
+library(pROC)
+library(randomForest)
+library(ROSE)
+library(ranger)
+library(dplyr)
+library(smotefamily)
+
+set.seed(2024)
+data <- read.csv("../../data/arbolado-mza-dataset.csv", header = TRUE, sep = ",")
+test <- read.csv("../../data/arbolado-mza-dataset-test.csv", header = TRUE, sep = ",")
+train  <-read.csv("../../data/arbolado-mendoza-dataset-train.csv", header = TRUE, sep = ",")
+validation <- read.csv("../../data/arbolado-mendoza-dataset-validation.csv", header = TRUE, sep = ",")
+print(train)
+dataFrame <- train
+
+maj <- dataFrame[dataFrame$inclinacion_peligrosa == 0, ]
+min <- dataFrame[dataFrame$inclinacion_peligrosa == 1, ]
+
+
+n = nrow(min) * 2
+n2 = n + nrow(min)
+dataUnder <- ovun.sample(inclinacion_peligrosa ~ ., data = dataFrame, method = "under", N = n * 3.4)$data
+
+
+
+create_folds <- function(dataFrame, num) {
+  indexes <- sample(1: nrow(dataFrame))
+  folds <- split(indexes, cut(seq_along(indexes), breaks = num, labels = FALSE))
+  names(folds) <- paste0("Fold", 1:num)
+  return(folds)
+}
+
+cross_validation <- function(dataFrame, num) {
+  dataFrame$inclinacion_peligrosa <- as.factor(dataFrame$inclinacion_peligrosa)
+
+  folds <- create_folds(dataFrame, num)
+
+  aucList <- list()
+  modelList <- list()
+
+  for (i in 1:num) {
+    indexes <- folds[[i]]
+    trainData <- dataFrame[-indexes, ]
+    valData <- dataFrame[indexes, ]
+    
+    tree_model<- ranger(inclinacion_peligrosa ~ especie + circ_tronco_cm + diametro_tronco + lat + long  + seccion, data = dataUnder, num.trees = 300, num.threads = 6, mtry = 2, min.node.size = 3, sample.fraction = 0.5, max.depth = 16)
+	  pred_probs <- predict(tree_model, valData)$predictions
+    
+    roc_obj <- roc(valData$inclinacion_peligrosa, pred_probs)
+    auc_value <- auc(roc_obj)
+    print(auc_value)
+
+    aucList[[paste0("Fold", i)]] <- auc_value
+    modelList[[paste0("Fold", i)]] <- tree_model
+  } 
+  mejorFold <- which.max(unlist(aucList))
+  bestModel <- modelList[[mejorFold]]
+  return(bestModel)
+}
+
+dataUnder$altura <- as.factor(dataUnder$altura)
+dataUnder$especie <- as.factor(dataUnder$especie)
+dataUnder$diametro_tronco <- as.factor(dataUnder$diametro_tronco)
+dataUnder$seccion <- as.factor(dataUnder$seccion)
+
+dataOver$altura <- as.factor(dataOver$altura)
+dataOver$especie <- as.factor(dataOver$especie)
+dataOver$diametro_tronco <- as.factor(dataOver$diametro_tronco)
+dataOver$seccion <- as.factor(dataOver$seccion)
+
+model1 = cross_validation(dataUnder, 8)
+
+prediccionesUnder <- predict(model1, data = validation)$predictions
+print("Auc nuevo")
+roc_obj <- roc(validation$inclinacion_peligrosa, prediccionesUnder)
+auc_value <- auc(roc_obj)
+print(auc_value)
+
+
+prediccionesUnder <- predict(model1, data = test)$predictions
+
+resultado <- data.frame(id = test$id, inclinacion_peligrosa = prediccionesUnder)
+
+write.csv(resultado, file = "prediccionesUnderSamplingWithRandomForestCrossValidationTest.csv", row.names = FALSE)
+
+
+```
+
+
+
+
+
+
